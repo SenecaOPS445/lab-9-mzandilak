@@ -1,0 +1,49 @@
+---
+
+- name: configue_ops445.yml
+  hosts: vmlab
+  become: yes
+  user: student
+  vars:
+    
+  tasks:
+    - name: update Apache
+      yum:
+        name: httpd
+        state: latest
+
+    - name: install EPEL repository
+      yum:
+        name: epel-release
+        state: present
+
+    - name: remove tree package
+      yum:
+        name: tree
+        state: absent
+
+    - name: set hostname to senecaid
+      hostname:
+        name: "mzandilak"
+
+    - name: create a new user with sudo access
+      user:
+        name: "mzandilak"
+        state: present
+        groups: wheel
+        append: yes
+
+    - name: copy ssh key for user
+      authorized_key:
+        user: "mzandilak"
+        state: present
+        key: "{{ lookup('file', '/home/mzandilak/.ssh/id_rsa.pub') }}"
+
+    - name: create directory structure for labs
+      file:
+        path: "/home/mzandilak/ops445/lab{{ item }}"
+        state: directory
+        mode: '0755'
+      with_sequence: start=1 end=9
+
+
